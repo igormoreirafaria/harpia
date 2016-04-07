@@ -33,9 +33,8 @@ from harpia.utils.XMLUtils import XMLParser
 
 
 #i18n
+from constants import *
 import gettext
-APP='harpia'
-DIR='/usr/share/harpia/po'
 _ = gettext.gettext
 gettext.bindtextdomain(APP, DIR)
 gettext.textdomain(APP)
@@ -50,56 +49,45 @@ class S2iCommonProperties:
     """
 
     #----------------------------------------------------------------------
-
     m_oColorSelectionDlg = None
     
     #----------------------------------------------------------------------
-    
     def __init__( self, *args ):
-
         pass
 
     #----------------------------------------------------------------------
-
     def __del__(self):
         pass
 
     #----------------------------------------------------------------------
-
     def RunColorSelection(self,*args):
         """
         This function creates a window for Color selection. This function is used to change the block back color and the border color.
         """
 
         if self.m_oColorSelectionDlg == None:
-            
             self.m_oColorSelectionDlg = gtk.ColorSelectionDialog(_("Color selection"))
-
         t_oColorSelection = self.m_oColorSelectionDlg.colorsel
-        
         t_oResponse = self.m_oColorSelectionDlg.run()
-
         if t_oResponse == gtk.RESPONSE_OK:
-
             t_oColor = t_oColorSelection.get_current_color()
-
             self.m_oColorSelectionDlg.hide()
-
             return t_oColor
-
         else:
             self.m_oColorSelectionDlg.hide()
-
             return None
             
     #----------------------------------------------------------------------
-    
     def on_cancel_clicked( self, *args ):
         self.widgets['Properties'].destroy()
         
 
-    #----------------------------------------------------------------------
+#----------------------------------------------------------------------
+    def on_confirm_clicked(self, *args):
+        self.m_oS2iBlockProperties.SetBackColor(self.m_oBackColor)
+        self.widgets['Properties'].destroy()
 
+    #----------------------------------------------------------------------
     def on_BackColorButton_clicked(self,*args):
         t_oColor = self.RunColorSelection()
         if t_oColor <> None:
@@ -109,17 +97,10 @@ class S2iCommonProperties:
             self.m_oBackColor[2] = t_oColor.blue / 257
 
     #----------------------------------------------------------------------
-
     def on_BorderColorButton_clicked(self,*args):
-        t_oColor = self.RunColorSelection()
-        if t_oColor <> None:
-            self.widgets['BorderColor'].modify_bg(gtk.STATE_NORMAL,t_oColor)
-            self.m_oBorderColor[0] = t_oColor.red / 257
-            self.m_oBorderColor[1] = t_oColor.green / 257
-            self.m_oBorderColor[2] = t_oColor.blue / 257
+        pass
 
     #----------------------------------------------------------------------
-
     def configure(self):
         self.widgets['Properties'].set_icon_from_file(self.m_sDataDir+"images/harpia_ave.png")
 

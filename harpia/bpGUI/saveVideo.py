@@ -31,6 +31,8 @@ import gtk
 from harpia.GladeWindow import GladeWindow
 from harpia.s2icommonproperties import S2iCommonProperties, APP, DIR
 
+from harpia.filefilters import * 
+
 # i18n
 import os
 from harpia.utils.XMLUtils import XMLParser
@@ -199,18 +201,8 @@ class Properties(GladeWindow, S2iCommonProperties):
         if os.name == 'posix':
             dialog.set_current_folder(os.path.expanduser("~"))
 
-        filter = gtk.FileFilter()
-        filter.set_name("Todos os arquivos")
-        filter.add_pattern("*")
-        dialog.add_filter(filter)
-
-        filter = gtk.FileFilter()
-        filter.set_name("videos")
-        filter.add_mime_type("*.mpeg")
-        filter.add_mime_type("*.avi")
-        filter.add_mime_type("*.mpg")
-        filter.add_mime_type("*.wmv")
-        dialog.add_filter(filter)
+        dialog.add_filter(AllFileFilter())
+        dialog.add_filter(VideoFileFilter())
 
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
@@ -256,16 +248,16 @@ def generate(blockTemplate):
                 codecMacro = 'CV_FOURCC(\'I\',\'2\',\'6\',\'3\')'
             if propIter[1] == "FLV1":
                 codecMacro = 'CV_FOURCC(\'F\',\'L\',\'V\',\'1\')'
-    blockTemplate.imagesIO = 'IplImage * block' + blockTemplate.blockNumber + '_img_i1 = NULL;\n' + \
-                             'IplImage * block' + blockTemplate.blockNumber + '_img_o1 = NULL;\n' + \
-                             'CvVideoWriter* block' + blockTemplate.blockNumber + '_vidWriter = NULL;\n'
-    blockTemplate.functionCall = '\nif(block' + blockTemplate.blockNumber + '_img_i1){\n' + \
-                                 '	if(block' + blockTemplate.blockNumber + '_vidWriter == NULL)//video writer not started up yet!\n' + \
-                                 '		block' + blockTemplate.blockNumber + '_vidWriter = cvCreateVideoWriter( "' + videoFilename + '", ' + codecMacro + ',' + frameRate + ', cvGetSize(block' + blockTemplate.blockNumber + '_img_i1), 1 );\n' + \
-                                 '	cvWriteFrame( block' + blockTemplate.blockNumber + '_vidWriter, block' + blockTemplate.blockNumber + '_img_i1);\n' + \
-                                 '	block' + blockTemplate.blockNumber + '_img_o1 = block' + blockTemplate.blockNumber + '_img_i1;\n' + \
+    blockTemplate.imagesIO = 'IplImage * block$$_img_i1 = NULL;\n' + \
+                             'IplImage * block$$_img_o1 = NULL;\n' + \
+                             'CvVideoWriter* block$$_vidWriter = NULL;\n'
+    blockTemplate.functionCall = '\nif(block$$_img_i1){\n' + \
+                                 '	if(block$$_vidWriter == NULL)//video writer not started up yet!\n' + \
+                                 '		block$$_vidWriter = cvCreateVideoWriter( "' + videoFilename + '", ' + codecMacro + ',' + frameRate + ', cvGetSize(block$$_img_i1), 1 );\n' + \
+                                 '	cvWriteFrame( block$$_vidWriter, block$$_img_i1);\n' + \
+                                 '	block$$_img_o1 = block$$_img_i1;\n' + \
                                  '}\n'
-    blockTemplate.dealloc = 'cvReleaseImage(&block' + blockTemplate.blockNumber + '_img_i1);\n'
+    blockTemplate.dealloc = 'cvReleaseImage(&block$$_img_i1);\n'
 
 
 # ------------------------------------------------------------------------------
@@ -276,8 +268,6 @@ def getBlock():
             'Path': {'Python': 'saveVideo',
                      'Glade': 'glade/saveVideo.ui',
                      'Xml': 'xml/saveVideo.xml'},
-            'Inputs': 1,
-            'Outputs': 1,
             'Icon': 'images/saveVideo.png',
             'Color': '120:20:20:150',
             'InTypes': {0: 'HRP_IMAGE'},

@@ -106,16 +106,6 @@ class Properties(GladeWindow, S2iCommonProperties):
 
         self.configure()
 
-        # load help text
-
-        # t_oS2iHelp = XMLParser(self.m_sDataDir + "help/threshold" + _("_en.help"))
-
-        # t_oTextBuffer = gtk.TextBuffer()
-
-        # t_oTextBuffer.set_text(unicode(str(t_oS2iHelp.getTag("help").getTag("content").getTagContent())))
-
-        # self.widgets['HelpView'].set_buffer(t_oTextBuffer)
-
     #----------------Help Text--------------------------------------
 
     def getHelp(self):#adicionado help
@@ -151,14 +141,7 @@ class Properties(GladeWindow, S2iCommonProperties):
                     Property.value = unicode("CV_THRESH_TOZERO")
                 if int(Active) == 4:
                     Property.value = unicode("CV_THRESH_TOZERO_INV")
-
-        self.m_oS2iBlockProperties.SetPropertiesXML(self.m_oPropertiesXML)
-
-        self.m_oS2iBlockProperties.SetBorderColor(self.m_oBorderColor)
-
-        self.m_oS2iBlockProperties.SetBackColor(self.m_oBackColor)
-
-        self.widgets['Properties'].destroy()
+        self.on_confirm_clicked(*args) # Call super
 
     # ----------------------------------------------------------------------
 
@@ -191,21 +174,21 @@ def generate(blockTemplate):
             thresholdType = propIter[1]
 
     blockTemplate.imagesIO = \
-        'IplImage * block' + blockTemplate.blockNumber + '_img_i1 = NULL;\n' + \
-        'IplImage * block' + blockTemplate.blockNumber + '_img_o1 = NULL;\n'
+        'IplImage * block$$_img_i1 = NULL;\n' + \
+        'IplImage * block$$_img_o1 = NULL;\n'
     blockTemplate.functionArguments = \
-        'int block' + blockTemplate.blockNumber + '_arg_threshold = ' + thresholdValue + ';\n' + \
-        'int block' + blockTemplate.blockNumber + '_arg_maxValue = ' + maxValue + ';\n' + \
-        'int block' + blockTemplate.blockNumber + '_arg_thresholdType = ' + thresholdType + ';\n'
-    blockTemplate.functionCall = '\nif(block' + blockTemplate.blockNumber + '_img_i1){\n' + \
-                                 'block' + blockTemplate.blockNumber + '_img_o1 = cvCreateImage(cvSize(block' + blockTemplate.blockNumber + \
-                                 '_img_i1->width,block' + blockTemplate.blockNumber + '_img_i1->height),block' + blockTemplate.blockNumber + \
-                                 '_img_i1->depth,block' + blockTemplate.blockNumber + '_img_i1->nChannels);\n' + \
-                                 '\ncvThreshold(block' + blockTemplate.blockNumber + '_img_i1,block' + blockTemplate.blockNumber + \
-                                 '_img_o1,block' + blockTemplate.blockNumber + '_arg_threshold,block' + blockTemplate.blockNumber + \
-                                 '_arg_maxValue,block' + blockTemplate.blockNumber + '_arg_thresholdType);}\n'
-    blockTemplate.dealloc = 'cvReleaseImage(&block' + blockTemplate.blockNumber + '_img_o1);\n' + \
-                            'cvReleaseImage(&block' + blockTemplate.blockNumber + '_img_i1);\n'
+        'int block$$_arg_threshold = ' + thresholdValue + ';\n' + \
+        'int block$$_arg_maxValue = ' + maxValue + ';\n' + \
+        'int block$$_arg_thresholdType = ' + thresholdType + ';\n'
+    blockTemplate.functionCall = '\nif(block$$_img_i1){\n' + \
+                                 'block$$_img_o1 = cvCreateImage(cvSize(block$$' + \
+                                 '_img_i1->width,block$$_img_i1->height),block$$' + \
+                                 '_img_i1->depth,block$$_img_i1->nChannels);\n' + \
+                                 '\ncvThreshold(block$$_img_i1,block$$' + \
+                                 '_img_o1,block$$_arg_threshold,block$$' + \
+                                 '_arg_maxValue,block$$_arg_thresholdType);}\n'
+    blockTemplate.dealloc = 'cvReleaseImage(&block$$_img_o1);\n' + \
+                            'cvReleaseImage(&block$$_img_i1);\n'
 
 
 # ------------------------------------------------------------------------------
@@ -216,8 +199,6 @@ def getBlock():
             "Path": {"Python": "threshold",
                      "Glade": "glade/threshold.ui",
                      "Xml": "xml/threshold.xml"},
-            "Inputs": 1,
-            "Outputs": 1,
             "Icon": "images/threshold.png",
             "Color": "50:125:50:150",
             "InTypes": {0: "HRP_IMAGE"},

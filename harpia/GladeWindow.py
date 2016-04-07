@@ -31,15 +31,15 @@ import os
 import gtk
 import gtk.glade
 # i18n
-import gettext
 
+from constants import *
+import gettext
 _ = gettext.gettext
-APP = 'harpia'
-DIR = '/usr/share/harpia/po'
+gettext.bindtextdomain(APP, DIR)
+gettext.textdomain(APP)
 
 
 # ----------------------------------------------------------------------
-
 def search_file(filename, search_path):
     """ This global function find a file, when gived a search path
     """
@@ -59,7 +59,6 @@ def search_file(filename, search_path):
 
 
 # ----------------------------------------------------------------------
-## Displays a GUI
 class GladeWindow(object):
     '''A base class for displaying a GUI developed with Glade. Create a subclass
     and add any callbacks and other code. The derived class
@@ -67,24 +66,18 @@ class GladeWindow(object):
     The callbacks that start with on_ are automatically connected.'''
 
     # ----------------------------------------------------------------------
-
     def set_search_path(cls, path):
-
         '''This function Sets the search path for looking for the .glade files'''
-
         cls.search_path = path
-
     set_search_path = classmethod(set_search_path)
 
     # ----------------------------------------------------------------------
-
     def __init__(self, filename, top_window, widget_list, handlers,
                  pull_down_dict=None):
-
         '''
         Constructor. 
-	The filename is simply the filename of the .glade file
-	top_window: the glade name of the top level widget (this will then
+    The filename is simply the filename of the .glade file
+    top_window: the glade name of the top level widget (this will then
            be accessible as self.top_window)
         widget_list: a list of glade names; the dictionary self.widgets
            will be created that maps these name to the actual widget object
@@ -93,8 +86,6 @@ class GladeWindow(object):
         '''
 
         # i18n stuff
-
-
         gettext.bindtextdomain(APP, DIR)
         gettext.textdomain(APP)
         gtk.glade.bindtextdomain(APP, DIR)
@@ -134,36 +125,28 @@ class GladeWindow(object):
         self.cb_func = None
 
     # ----------------------------------------------------------------------
-
     def set_top_window(self, top_window):
-
         ''' 
         Notebook pages that are in containers need to be able to change
         their top window, especially so the dialog is set_transient_for
         the actual main window
         '''
-
         self.top_window = top_window
 
     # ----------------------------------------------------------------------
-
     def set_callback_function(self, cb_func, *cb_args, **cb_kwargs):
-
         '''
-	Stores the cb_func and its cb_args and cb_kwargs
+    Stores the cb_func and its cb_args and cb_kwargs
         '''
         self.cb_func = cb_func
         self.cb_args = cb_args
         self.cb_kwargs = cb_kwargs
 
     # ----------------------------------------------------------------------
-
     def show(self, center=1, prev_window=None, *args):
-
         '''
         Display the top_window widget
         '''
-
         if prev_window is not None:
             self.prev_window = prev_window
         if center:
@@ -173,15 +156,12 @@ class GladeWindow(object):
         self.top_window.show()
 
     # ----------------------------------------------------------------------
-
     def hide(self):
-
         '''
         Hides the current window, shows self.prev_window
         if self.cb_func is not None, it is called with its cb_args
         and cb_kwargs
         '''
-
         self.top_window.hide()
         if self.prev_window is not None:
             self.prev_window.show()

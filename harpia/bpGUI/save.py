@@ -30,6 +30,7 @@ import gtk
 
 from harpia.GladeWindow import GladeWindow
 from harpia.s2icommonproperties import S2iCommonProperties, APP, DIR
+from harpia.filefilters import * 
 
 # i18n
 import os
@@ -152,15 +153,8 @@ class Properties(GladeWindow, S2iCommonProperties):
         if os.name == 'posix':
             dialog.set_current_folder(os.path.expanduser("~"))
 
-        filter = gtk.FileFilter()
-        filter.set_name("Todos os arquivos")
-        filter.add_pattern("*")
-        dialog.add_filter(filter)
-
-        filter = gtk.FileFilter()
-        filter.set_name("imagens")
-        filter.add_mime_type("*.jpg")
-        dialog.add_filter(filter)
+        dialog.add_filter(AllFileFilter())
+        dialog.add_filter(JPGFileFilter())
 
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
@@ -185,14 +179,14 @@ def generate(blockTemplate):
         if propIter[0] == 'filename':
             saveFilename = os.path.expanduser(propIter[1])
     blockTemplate.imagesIO = \
-        'IplImage * block' + blockTemplate.blockNumber + '_img_i1 = NULL;\n' + \
-        'IplImage * block' + blockTemplate.blockNumber + '_img_o1 = NULL;\n'
+        'IplImage * block$$_img_i1 = NULL;\n' + \
+        'IplImage * block$$_img_o1 = NULL;\n'
     blockTemplate.functionCall = \
-        'block' + blockTemplate.blockNumber + '_img_o1 = cvCloneImage(block' + blockTemplate.blockNumber + '_img_i1);\n' + \
-        '\nif(block' + blockTemplate.blockNumber + '_img_i1)\n' + \
-        'cvSaveImage("' + saveFilename + '" ,block' + blockTemplate.blockNumber + '_img_i1);\n'
-    blockTemplate.dealloc = 'cvReleaseImage(&block' + blockTemplate.blockNumber + '_img_o1);\n' + \
-                            'cvReleaseImage(&block' + blockTemplate.blockNumber + '_img_i1);\n'
+        'block$$_img_o1 = cvCloneImage(block$$_img_i1);\n' + \
+        '\nif(block$$_img_i1)\n' + \
+        'cvSaveImage("' + saveFilename + '" ,block$$_img_i1);\n'
+    blockTemplate.dealloc = 'cvReleaseImage(&block$$_img_o1);\n' + \
+                            'cvReleaseImage(&block$$_img_i1);\n'
 
 
 # ------------------------------------------------------------------------------
@@ -203,8 +197,6 @@ def getBlock():
             "Path": {"Python": "save",
                      "Glade": "glade/save.ui",
                      "Xml": "xml/save.xml"},
-            "Inputs": 1,
-            "Outputs": 1,
             "Icon": "images/save.png",
             "Color": "50:100:200:150",
             "InTypes": {0: "HRP_IMAGE"},
